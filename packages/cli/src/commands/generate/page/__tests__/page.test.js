@@ -40,12 +40,11 @@ import fs from 'fs'
 import path from 'path'
 
 // Load mocks
-import 'src/lib/test'
+import '../../../../lib/test'
 
 import { ensurePosixPath } from '@redwoodjs/internal'
 
-import { getPaths } from 'src/lib'
-
+import { getPaths } from '../../../../lib'
 import { pathName } from '../../helpers'
 import * as page from '../page'
 
@@ -55,7 +54,9 @@ let singleWordFiles,
   paramFiles,
   noTestsFiles,
   noStoriesFiles,
-  typescriptFiles
+  typescriptFiles,
+  typescriptParamFiles,
+  typescriptParamTypeFiles
 
 beforeAll(() => {
   singleWordFiles = page.files({
@@ -94,13 +95,26 @@ beforeAll(() => {
     stories: false,
     ...page.paramVariants(pathName(undefined, 'no-stories')),
   })
-
   typescriptFiles = page.files({
     name: 'TSFiles',
     typescript: true,
     tests: true,
     stories: true,
     ...page.paramVariants(pathName(undefined, 'typescript')),
+  })
+  typescriptParamFiles = page.files({
+    name: 'TSParamFiles',
+    typescript: true,
+    tests: true,
+    stories: true,
+    ...page.paramVariants(pathName('{id}', 'typescript-param')),
+  })
+  typescriptParamTypeFiles = page.files({
+    name: 'TSParamTypeFiles',
+    typescript: true,
+    tests: true,
+    stories: true,
+    ...page.paramVariants(pathName('{id:Int}', 'typescript-param-with-type')),
   })
 })
 
@@ -234,44 +248,40 @@ test('creates a path equal to passed path', () => {
   ])
 })
 
-test('paramVariants returns empty string for no params', () => {
-  expect(page.paramVariants()).toEqual({
+test('paramVariants returns empty strings for no params', () => {
+  const emptyParams = {
     propParam: '',
     propValueParam: '',
     argumentParam: '',
     paramName: '',
     paramValue: '',
-  })
-  expect(page.paramVariants('')).toEqual({
-    propParam: '',
-    propValueParam: '',
-    argumentParam: '',
-    paramName: '',
-    paramValue: '',
-  })
-  expect(page.paramVariants('/')).toEqual({
-    propParam: '',
-    propValueParam: '',
-    argumentParam: '',
-    paramName: '',
-    paramValue: '',
-  })
-  expect(page.paramVariants('/post/edit')).toEqual({
-    propParam: '',
-    propValueParam: '',
-    argumentParam: '',
-    paramName: '',
-    paramValue: '',
-  })
+    paramType: '',
+  }
+  expect(page.paramVariants()).toEqual(emptyParams)
+  expect(page.paramVariants('')).toEqual(emptyParams)
+  expect(page.paramVariants('/')).toEqual(emptyParams)
+  expect(page.paramVariants('/post/edit')).toEqual(emptyParams)
 })
 
-test('paramVariants finds the param in the middle of the path', () => {
+test('paramVariants finds the param and type in the middle of the path', () => {
   expect(page.paramVariants('/post/{id:Int}/edit')).toEqual({
     propParam: '{ id }',
     propValueParam: 'id="42" ',
     argumentParam: "{ id: '42' }",
     paramName: 'id',
-    paramValue: ' 42',
+    paramValue: '42',
+    paramType: 'Int',
+  })
+})
+
+test('paramVariants paramType defaults to string', () => {
+  expect(page.paramVariants('/posts/{id}')).toEqual({
+    propParam: '{ id }',
+    propValueParam: 'id="42" ',
+    argumentParam: "{ id: '42' }",
+    paramName: 'id',
+    paramValue: '42',
+    paramType: 'string',
   })
 })
 
@@ -297,7 +307,13 @@ test('file generation', async () => {
 
   global.mockFs = true
 
-  await page.handler({ name: 'home', path: '', force: false })
+  await page.handler({
+    name: 'home',
+    path: '',
+    force: false,
+    tests: true,
+    stories: true,
+  })
 
   expect(spy).toHaveBeenCalled()
 
@@ -335,7 +351,13 @@ test('file generation with route params', async () => {
   const spy = jest.spyOn(fs, 'writeFileSync')
   global.mockFs = true
 
-  await page.handler({ name: 'post', path: '{id}', force: false })
+  await page.handler({
+    name: 'post',
+    path: '{id}',
+    force: false,
+    tests: true,
+    stories: true,
+  })
 
   expect(spy).toHaveBeenCalled()
 
@@ -372,6 +394,22 @@ test('generates typescript pages', () => {
     typescriptFiles[
       path.normalize(
         '/path/to/project/web/src/pages/TsFilesPage/TsFilesPage.test.tsx'
+      )
+    ]
+  ).toMatchSnapshot()
+
+  expect(
+    typescriptParamFiles[
+      path.normalize(
+        '/path/to/project/web/src/pages/TsParamFilesPage/TsParamFilesPage.tsx'
+      )
+    ]
+  ).toMatchSnapshot()
+
+  expect(
+    typescriptParamTypeFiles[
+      path.normalize(
+        '/path/to/project/web/src/pages/TsParamTypeFilesPage/TsParamTypeFilesPage.tsx'
       )
     ]
   ).toMatchSnapshot()

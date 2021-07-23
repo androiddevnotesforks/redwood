@@ -5,7 +5,6 @@
 export {
   Router,
   Route,
-  Private,
   Link,
   NavLink,
   useMatch,
@@ -15,6 +14,7 @@ export {
   useLocation,
   LocationProvider,
   navigate,
+  back,
   PageLoadingContext,
 } from './internal'
 

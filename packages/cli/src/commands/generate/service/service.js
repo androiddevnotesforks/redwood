@@ -3,9 +3,7 @@ import pascalcase from 'pascalcase'
 import pluralize from 'pluralize'
 import terminalLink from 'terminal-link'
 
-import { getSchema } from 'src/lib'
-
-import { transformTSToJS } from '../../../lib'
+import { getSchema, transformTSToJS } from '../../../lib'
 import { yargsDefaults } from '../../generate'
 import {
   templateForComponentFile,
@@ -44,13 +42,18 @@ export const parseSchema = async (model) => {
 }
 
 export const scenarioFieldValue = (field) => {
-  const rand = parseInt(Math.random() * 10000000)
+  const randFloat = Math.random() * 10000000
+  const randInt = parseInt(Math.random() * 10000000)
 
   switch (field.type) {
     case 'String':
-      return field.isUnique ? `String${rand}` : 'String'
+      return field.isUnique ? `String${randInt}` : 'String'
+    case 'Boolean':
+      return true
+    case 'Decimal':
+      return randFloat
     case 'Int':
-      return rand
+      return randInt
     case 'DateTime':
       return new Date().toISOString().replace(/\.\d{3}/, '')
     case 'Json':
@@ -160,8 +163,8 @@ export const fieldsToUpdate = async (model) => {
 
   if (foreignKeys.includes(field.name)) {
     // no scalar fields, change a relation field instead
-    // { post: [ 'postId' ], tag: [ 'tagId' ] }
-    fieldName = Object.values(relations)[0]
+    // { post: { foreignKey: [ 'postId' ], type: "Post" }, tag: { foreignKey: [ 'tagId' ], type: "Post" } }
+    fieldName = Object.values(relations)[0].foreignKey
     newValue = `scenario.${modelName}.two.${field.name}`
   } else {
     fieldName = field.name
@@ -178,6 +181,14 @@ export const fieldsToUpdate = async (model) => {
       }
       case 'Int': {
         newValue = newValue + 1
+        break
+      }
+      case 'Decimal': {
+        newValue = newValue + 1.1
+        break
+      }
+      case 'Boolean': {
+        newValue = !value
         break
       }
       case 'DateTime': {
@@ -208,7 +219,7 @@ export const fieldsToUpdate = async (model) => {
 
 export const files = async ({
   name,
-  tests = true,
+  tests,
   relations,
   typescript,
   ...rest
@@ -248,6 +259,7 @@ export const files = async ({
     templatePath: `scenarios.${extension}.template`,
     templateVars: {
       scenario: await buildScenario(model),
+      prismaTypeName: `${model}CreateArgs`,
       ...rest,
     },
   })
@@ -279,7 +291,6 @@ export const files = async ({
 export const defaults = {
   ...yargsDefaults,
   tests: {
-    default: true,
     description: 'Generate test files',
     type: 'boolean',
   },
@@ -307,11 +318,9 @@ export const builder = (yargs) => {
   })
 }
 
-export const {
-  command,
-  description,
-  handler,
-} = createYargsForComponentGeneration({
-  componentName: 'service',
-  filesFn: files,
-})
+export const { command, description, handler } =
+  createYargsForComponentGeneration({
+    componentName: 'service',
+    filesFn: files,
+    shouldEnsureUniquePlural: true,
+  })

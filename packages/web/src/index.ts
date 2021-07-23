@@ -12,12 +12,14 @@ export {
   useMutation,
 } from './components/GraphQLHooksProvider'
 
-import { createCell } from './components/createCell'
-export { createCell }
+export {
+  createCell,
+  CellFailureProps,
+  CellLoadingProps,
+  CellSuccessProps,
+} from './components/createCell'
 
-/** @deprecated `withCell` will be removed in v0.32.0, please use `createCell` instead. */
-export const withCell = createCell
+export * from './components/RedwoodProvider'
 
-// TODO: Remove these in v.10, people can import from `@redwoodjs/web/toast`
-// deprecated
-export { useFlash, Flash } from './flash'
+export * from './components/MetaTags'
+export { Helmet as Head, Helmet } from 'react-helmet-async'

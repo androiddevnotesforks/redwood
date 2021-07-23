@@ -39,16 +39,20 @@ export const handler = ({ open, port, build, buildDirectory }) => {
   const staticAssetsFolder = path.join(getPaths().web.base, 'public')
   // Create the `MockServiceWorker.js` file
   // https://mswjs.io/docs/cli/init
-  execa(`yarn msw init "${staticAssetsFolder}"`, undefined, {
+  execa(`yarn msw init "${staticAssetsFolder}" --no-save`, undefined, {
     stdio: 'inherit',
     shell: true,
     cwd,
   })
 
+  const storybookConfig = path.dirname(
+    require.resolve('@redwoodjs/testing/config/storybook/main.js')
+  )
+
   execa(
     `yarn ${build ? 'build' : 'start'}-storybook`,
     [
-      '--config-dir ../node_modules/@redwoodjs/core/config/storybook',
+      `--config-dir "${storybookConfig}"`,
       !build && `--port ${port}`,
       !build && '--no-version-updates',
       !build && `--static-dir "${staticAssetsFolder}"`,

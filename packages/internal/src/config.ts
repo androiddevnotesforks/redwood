@@ -40,6 +40,15 @@ export interface Config {
   browser: {
     open: boolean | string
   }
+  generate: {
+    tests: boolean
+    stories: boolean
+    nestScaffoldByModel: boolean
+  }
+  experimental: {
+    esbuild: boolean
+    useEnvelop: boolean
+  }
 }
 
 // Note that web's includeEnvironmentVariables is handled in `webpack.common.js`
@@ -60,10 +69,19 @@ const DEFAULT_CONFIG: Config = {
     port: 8911,
     path: './api',
     target: TargetEnum.NODE,
-    schemaPath: './api/prisma/schema.prisma',
+    schemaPath: './api/db/schema.prisma',
   },
   browser: {
     open: false,
+  },
+  generate: {
+    tests: true,
+    stories: true,
+    nestScaffoldByModel: true,
+  },
+  experimental: {
+    esbuild: false,
+    useEnvelop: false,
   },
 }
 

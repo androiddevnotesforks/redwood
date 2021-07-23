@@ -1,12 +1,13 @@
 import fs from 'fs'
 import path from 'path'
 
+import boxen from 'boxen'
 import execa from 'execa'
 import Listr from 'listr'
 import terminalLink from 'terminal-link'
 
-import { getPaths, writeFilesTask } from 'src/lib'
-import c from 'src/lib/colors'
+import { getPaths, writeFilesTask } from '../../../lib'
+import c from '../../../lib/colors'
 
 const REDWOOD_TOML_PATH = path.join(getPaths().base, 'redwood.toml')
 const SUPPORTED_PROVIDERS = fs
@@ -195,9 +196,14 @@ export const handler = async ({ provider, force, database }) => {
       {
         title: 'One more thing...',
         task: (_ctx, task) => {
-          task.title = `One more thing...\n\n   ${providerData.notes.join(
-            '\n   '
-          )}\n`
+          task.title = `One more thing...\n\n ${boxen(
+            providerData.notes.join('\n   '),
+            {
+              padding: { top: 0, bottom: 0, right: 0, left: 0 },
+              margin: 1,
+              borderColour: 'gray',
+            }
+          )}  \n`
         },
       },
     ].filter(Boolean),

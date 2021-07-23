@@ -1,5 +1,4 @@
-import { transformTSToJS } from 'src/lib'
-
+import { transformTSToJS } from '../../../lib'
 import { yargsDefaults } from '../../generate'
 import {
   templateForComponentFile,
@@ -9,13 +8,7 @@ import {
 const COMPONENT_SUFFIX = 'Layout'
 const REDWOOD_WEB_PATH_NAME = 'layouts'
 
-export const files = ({
-  name,
-  tests = true,
-  stories = true,
-  typescript = false,
-  ...options
-}) => {
+export const files = ({ name, typescript = false, ...options }) => {
   const extension = typescript ? '.tsx' : '.js'
   const layoutFile = templateForComponentFile({
     name,
@@ -45,11 +38,11 @@ export const files = ({
   })
 
   const files = [layoutFile]
-  if (stories) {
+  if (options.stories) {
     files.push(storyFile)
   }
 
-  if (tests) {
+  if (options.tests) {
     files.push(testFile)
   }
 
@@ -68,7 +61,7 @@ export const files = ({
   }, {})
 }
 
-const builderObj = {
+const optionsObj = {
   skipLink: {
     default: false,
     description: 'Generate with skip link',
@@ -77,13 +70,9 @@ const builderObj = {
   ...yargsDefaults,
 }
 
-export const {
-  command,
-  description,
-  builder,
-  handler,
-} = createYargsForComponentGeneration({
-  componentName: 'layout',
-  filesFn: files,
-  builderObj,
-})
+export const { command, description, builder, handler } =
+  createYargsForComponentGeneration({
+    componentName: 'layout',
+    filesFn: files,
+    optionsObj,
+  })

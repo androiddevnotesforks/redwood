@@ -33,7 +33,7 @@ const BLayout = ({ children }) => (
 
 test('wraps components in other components', async () => {
   const TestSet = () => (
-    <Router useAuth={window.__REDWOOD__USE_AUTH}>
+    <Router>
       <Set wrap={[CustomWrapper, GlobalLayout]}>
         <ChildA />
         <Set wrap={BLayout}>
@@ -58,9 +58,6 @@ test('wraps components in other components', async () => {
           <h1>
             Global Layout
           </h1>
-          <h1>
-            ChildA
-          </h1>
           <div>
             <h1>
               Layout for B
@@ -84,9 +81,6 @@ test('wraps components in other components', async () => {
           Custom Wrapper End
         </p>
       </div>
-      <h1>
-        ChildC
-      </h1>
     </div>
   `)
 })
@@ -106,7 +100,7 @@ test('passes props to wrappers', async () => {
     </div>
   )
   const TestSet = () => (
-    <Router useAuth={window.__REDWOOD__USE_AUTH}>
+    <Router>
       <Set wrap={[PropWrapper, GlobalLayout]} propOne="une" propTwo="deux">
         <Route path="/" page={ChildA} name="childa" />
       </Set>

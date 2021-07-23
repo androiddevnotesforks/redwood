@@ -16,15 +16,19 @@ const buildEvent = ({
   payload,
   signature,
   signatureHeader,
+  isBase64Encoded = false,
 }): APIGatewayProxyEvent => {
   const headers = {}
   headers[signatureHeader.toLocaleLowerCase()] = signature
+  const body = isBase64Encoded
+    ? Buffer.from(payload || '').toString('base64')
+    : payload
 
   return {
-    body: payload,
+    body,
     headers,
     multiValueHeaders: {},
-    isBase64Encoded: false,
+    isBase64Encoded,
     path: '',
     pathParameters: null,
     stageVariables: null,
@@ -35,6 +39,14 @@ const buildEvent = ({
     multiValueQueryStringParameters: null,
   }
 }
+
+beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(jest.fn())
+})
+
+afterEach(() => {
+  jest.spyOn(console, 'warn').mockRestore()
+})
 
 describe('webhooks', () => {
   describe('using the timestampScheme verifier', () => {
@@ -180,7 +192,7 @@ describe('webhooks', () => {
   })
 
   describe('webhooks via event', () => {
-    describe('when it receives and event  extracts the signature and payload from the event', () => {
+    describe('when it receives and event extracts the signature and payload from the event', () => {
       test('it can verify an event body payload with a signature it generates', () => {
         const signature = signPayload('timestampSchemeVerifier', {
           payload,
@@ -191,6 +203,24 @@ describe('webhooks', () => {
           payload,
           signature,
           signatureHeader: DEFAULT_WEBHOOK_SIGNATURE_HEADER,
+        })
+
+        expect(
+          verifyEvent('timestampSchemeVerifier', { event, secret })
+        ).toBeTruthy()
+      })
+
+      test('it can verify an event base64encoded body payload with a signature it generates', () => {
+        const signature = signPayload('timestampSchemeVerifier', {
+          payload,
+          secret,
+        })
+
+        const event = buildEvent({
+          payload,
+          signature,
+          signatureHeader: DEFAULT_WEBHOOK_SIGNATURE_HEADER,
+          isBase64Encoded: true,
         })
 
         expect(

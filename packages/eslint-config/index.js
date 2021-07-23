@@ -8,13 +8,11 @@ module.exports = {
     './shared.js',
     config.web.a11y && 'plugin:jsx-a11y/recommended',
   ].filter(Boolean),
-  plugins: ['@redwoodjs/eslint-plugin-redwood'],
   overrides: [
     {
       files: ['web/src/Routes.js', 'web/src/Routes.tsx'],
       rules: {
         'no-undef': 'off',
-        '@redwoodjs/redwood/no-unavailable-pages': 'error',
         'jsx-a11y/aria-role': [
           2,
           {
@@ -41,6 +39,9 @@ module.exports = {
         node: true,
         commonjs: true,
       },
+      globals: {
+        Promise: 'readonly',
+      },
     },
     // `web` side
     {
@@ -52,6 +53,8 @@ module.exports = {
       globals: {
         React: 'readonly',
         gql: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
       },
     },
     // Test, stories, scenarios, and mock files

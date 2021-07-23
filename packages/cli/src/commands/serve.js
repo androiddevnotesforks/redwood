@@ -13,7 +13,7 @@ import {
 } from '@redwoodjs/api-server'
 import { getPaths } from '@redwoodjs/internal'
 
-import c from 'src/lib/colors'
+import c from '../lib/colors'
 
 export const command = 'serve [side]'
 export const description = 'Run server for api or web in production'
@@ -69,9 +69,9 @@ export const builder = (yargs) => {
 
       if (
         // serve both
-        (positionalArgs.length === 1 &&
-          !fs.existsSync(path.join(getPaths().api.dist))) ||
-        !fs.existsSync(path.join(getPaths().web.dist), 'index.html')
+        positionalArgs.length === 1 &&
+        (!fs.existsSync(path.join(getPaths().api.dist)) ||
+          !fs.existsSync(path.join(getPaths().web.dist), 'index.html'))
       ) {
         console.error(
           c.error(
